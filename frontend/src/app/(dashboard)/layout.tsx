@@ -37,8 +37,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 key={item.name}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${isActive
-                                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                        : "text-foreground/70 hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                    : "text-foreground/70 hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
                                     }`}
                             >
                                 <item.icon className={`w-5 h-5 ${isActive ? "text-accent" : ""}`} />
@@ -48,15 +48,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     })}
                 </div>
 
-                <div className="p-4 border-t border-black/5 dark:border-white/5">
-                    <div className="bg-gradient-to-br from-accent/20 to-accent/5 rounded-2xl p-4 border border-accent/10">
-                        <h4 className="font-semibold text-sm mb-1">Dollaby Premium</h4>
-                        <p className="text-xs text-foreground/60 mb-3">AI Wardrobe is active.</p>
-                        <button className="w-full bg-background border border-black/10 dark:border-white/10 text-xs font-medium py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                            Manage Plan
-                        </button>
-                    </div>
-                </div>
             </aside>
 
             {/* Main Content */}

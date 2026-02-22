@@ -17,6 +17,7 @@ export default function SignupPage() {
         // Mock signup delay
         setTimeout(() => {
             setIsLoading(false);
+            localStorage.setItem("dollaby_userName", name || "User");
             window.location.href = "/dashboard";
         }, 1500);
     };

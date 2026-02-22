@@ -3,15 +3,25 @@
 import { motion } from "framer-motion";
 import { Shirt, Plus, Calendar as CalendarIcon, Sun, CloudRain } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function DashboardOverview() {
+    const [userName, setUserName] = useState("User");
+
+    useEffect(() => {
+        const storedName = localStorage.getItem("dollaby_userName");
+        if (storedName) {
+            setUserName(storedName);
+        }
+    }, []);
+
     return (
         <div className="flex flex-col gap-8 pb-10">
 
             {/* Header & Quick Action */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-1 cursor-default">Good morning, Sarah</h1>
+                    <h1 className="text-3xl font-bold tracking-tight mb-1 cursor-default">Good morning, {userName}</h1>
                     <p className="text-foreground/60">Here is your wardrobe overview for today.</p>
                 </div>
                 <Link href="/closet/upload" className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-medium hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20 transition-all">

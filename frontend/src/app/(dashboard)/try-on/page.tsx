@@ -1,27 +1,48 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Upload, Image as ImageIcon, Camera, ArrowRight, Wand2, X, Shirt, Save } from "lucide-react";
+import { Sparkles, Upload, Image as ImageIcon, Camera, ArrowRight, Wand2, X, Shirt, Save, Layers } from "lucide-react";
 import { useState } from "react";
+
+// Mock data for selections
+const closetItems = [
+    { id: 1, type: "Top", name: "White Silk Blouse", url: "https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=500&q=80" },
+    { id: 2, type: "Bottom", name: "Beige Chinos", url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=500&q=80" },
+    { id: 3, type: "Top", name: "Navy Blazer", url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&q=80" },
+];
+
+const savedOutfits = [
+    { id: 1, name: "Office Ready", items: ["White Silk Blouse", "Navy Blazer"], url: "https://images.unsplash.com/photo-1434389678369-182cb14b0972?w=500&q=80" }, // Visual representation
+    { id: 2, name: "Casual Sunday", items: ["Linen Shirt", "Beige Chinos"], url: "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=500&q=80" },
+];
 
 export default function VirtualTryOnPage() {
     const [personImage, setPersonImage] = useState<string | null>("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80"); // Mock default
-    const [garmentImage, setGarmentImage] = useState<string | null>("https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=500&q=80");
+    const [selectedGarment, setSelectedGarment] = useState<{ name: string, url: string } | null>(null);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [resultImage, setResultImage] = useState<string | null>(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showResultModal, setShowResultModal] = useState(false);
+
+    // Selection Modal State
+    const [showSelectionModal, setShowSelectionModal] = useState(false);
+    const [activeTab, setActiveTab] = useState<"closet" | "outfits">("closet");
 
     const handleGenerate = () => {
         setIsGenerating(true);
         // Simulate generation delay
         setTimeout(() => {
             setIsGenerating(false);
-            // Mock result showing person wearing the garment (just showing the person for mockup purposes)
+            // Mock result
             setResultImage("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80");
-            setShowModal(true);
+            setShowResultModal(true);
         }, 4000);
     };
+
+    const handleSelectGarment = (item: { name: string, url: string }) => {
+        setSelectedGarment(item);
+        setShowSelectionModal(false);
+    }
 
     return (
         <div className="flex flex-col h-[calc(100vh-140px)]">
@@ -30,7 +51,7 @@ export default function VirtualTryOnPage() {
                     <h1 className="text-3xl font-bold tracking-tight mb-1 flex items-center gap-2">
                         Virtual Try-On <Sparkles className="w-5 h-5 text-accent" />
                     </h1>
-                    <p className="text-foreground/60">Upload your photo and a garment to see how it looks instantly.</p>
+                    <p className="text-foreground/60">Upload your photo and select a garment or outfit to try on.</p>
                 </div>
             </div>
 
@@ -62,22 +83,31 @@ export default function VirtualTryOnPage() {
                     </div>
 
                     <div className="glass rounded-3xl p-6 border border-black/5 dark:border-white/5 space-y-4">
-                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                            <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-bold">2</span>
-                            Select Garment
-                        </h3>
-                        <div className="aspect-[4/3] rounded-2xl border-2 border-dashed border-black/10 dark:border-white/10 relative overflow-hidden group cursor-pointer hover:border-accent/50 transition-colors bg-white/40 dark:bg-black/20">
-                            {garmentImage ? (
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-bold">2</span>
+                                Select Clothing
+                            </h3>
+                            {selectedGarment && (
+                                <button onClick={() => setShowSelectionModal(true)} className="text-xs font-medium text-accent hover:underline">Change</button>
+                            )}
+                        </div>
+
+                        <div
+                            className="aspect-[4/3] rounded-2xl border-2 border-dashed border-black/10 dark:border-white/10 relative overflow-hidden group cursor-pointer hover:border-accent/50 transition-colors bg-white/40 dark:bg-black/20"
+                            onClick={() => setShowSelectionModal(true)}
+                        >
+                            {selectedGarment ? (
                                 <>
-                                    <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${garmentImage})`, mixBlendMode: 'multiply' }} />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                        <span className="text-white text-sm font-medium flex items-center gap-2"><Shirt className="w-4 h-4" /> Choose from Closet</span>
+                                    <div className="w-full h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${selectedGarment.url})`, mixBlendMode: 'multiply' }} />
+                                    <div className="absolute bottom-0 w-full bg-white/80 dark:bg-black/80 backdrop-blur p-2 text-center text-xs font-medium border-t border-black/5">
+                                        {selectedGarment.name}
                                     </div>
                                 </>
                             ) : (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-foreground/40 gap-3 group-hover:text-accent transition-colors">
-                                    <ImageIcon className="w-8 h-8" />
-                                    <span className="text-sm font-medium">Select to Try On</span>
+                                    <Shirt className="w-8 h-8" />
+                                    <span className="text-sm font-medium">Choose from Closet or Outfits</span>
                                 </div>
                             )}
                         </div>
@@ -104,7 +134,7 @@ export default function VirtualTryOnPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-bold mb-2">Generating Preview</h3>
-                                    <p className="text-foreground/60 text-sm leading-relaxed">Our generative AI is calculating fabric drape, lighting, and fit. This may take a few seconds.</p>
+                                    <p className="text-foreground/60 text-sm leading-relaxed">Our generative AI is mapping the fabric physics and lighting to your photo. Please wait.</p>
                                 </div>
                             </motion.div>
                         ) : (
@@ -117,11 +147,11 @@ export default function VirtualTryOnPage() {
                                     <Sparkles className="w-8 h-8" />
                                 </div>
                                 <h2 className="text-3xl font-bold mb-4 tracking-tight">Ready to see the magic?</h2>
-                                <p className="text-foreground/70 mb-8 max-w-sm">Combining your image and garment to create a hyper-realistic try-on rendering.</p>
+                                <p className="text-foreground/70 mb-8 max-w-sm">Combining your image and wardrobe selection to create a hyper-realistic try-on rendering.</p>
 
                                 <button
                                     onClick={handleGenerate}
-                                    disabled={!personImage || !garmentImage}
+                                    disabled={!personImage || !selectedGarment}
                                     className="bg-primary text-primary-foreground px-10 py-4 rounded-full text-lg font-medium hover:bg-primary/90 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-3 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                 >
                                     Generate Try-On <ArrowRight className="w-5 h-5" />
@@ -133,9 +163,75 @@ export default function VirtualTryOnPage() {
                 </div>
             </div>
 
+            {/* Garment Selection Modal */}
+            <AnimatePresence>
+                {showSelectionModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-10 bg-black/60 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                            className="w-full max-w-2xl bg-white dark:bg-[#111] rounded-[2rem] shadow-2xl overflow-hidden border border-black/10 dark:border-white/10 flex flex-col max-h-[80vh]"
+                        >
+                            <div className="p-6 border-b border-black/5 dark:border-white/5 flex justify-between items-center">
+                                <h2 className="text-xl font-bold">Select Clothing</h2>
+                                <button onClick={() => setShowSelectionModal(false)} className="w-8 h-8 rounded-full hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-center transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="px-6 pt-4 flex gap-4 border-b border-black/5 dark:border-white/5">
+                                <button
+                                    onClick={() => setActiveTab("closet")}
+                                    className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === "closet" ? "border-accent text-accent" : "border-transparent text-foreground/50 hover:text-foreground"}`}
+                                >
+                                    <div className="flex items-center gap-2"><Shirt className="w-4 h-4" /> My Closet</div>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab("outfits")}
+                                    className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === "outfits" ? "border-accent text-accent" : "border-transparent text-foreground/50 hover:text-foreground"}`}
+                                >
+                                    <div className="flex items-center gap-2"><Layers className="w-4 h-4" /> Saved Outfits</div>
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 bg-black/5 dark:bg-white/5">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    {activeTab === "closet" ? (
+                                        closetItems.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                onClick={() => handleSelectGarment(item)}
+                                                className="bg-white dark:bg-black rounded-xl p-3 border border-black/5 dark:border-white/5 cursor-pointer hover:border-accent hover:shadow-md transition-all group"
+                                            >
+                                                <div className="aspect-square bg-white/40 dark:bg-black/20 rounded-lg mb-3 bg-contain bg-center bg-no-repeat group-hover:scale-105 transition-transform" style={{ backgroundImage: `url(${item.url})`, mixBlendMode: 'multiply' }} />
+                                                <p className="text-xs font-semibold truncate">{item.name}</p>
+                                                <p className="text-[10px] text-foreground/50 uppercase">{item.type}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        savedOutfits.map((outfit) => (
+                                            <div
+                                                key={outfit.id}
+                                                onClick={() => handleSelectGarment(outfit)}
+                                                className="bg-white dark:bg-black rounded-xl p-3 border border-black/5 dark:border-white/5 cursor-pointer hover:border-accent hover:shadow-md transition-all group"
+                                            >
+                                                <div className="aspect-square bg-white/40 dark:bg-black/20 rounded-lg mb-3 bg-contain bg-center bg-no-repeat group-hover:scale-105 transition-transform" style={{ backgroundImage: `url(${outfit.url})`, mixBlendMode: 'multiply' }} />
+                                                <p className="text-xs font-semibold truncate">{outfit.name}</p>
+                                                <p className="text-[10px] text-foreground/50 truncate">{outfit.items.length} items</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Result Modal */}
             <AnimatePresence>
-                {showModal && resultImage && (
+                {showResultModal && resultImage && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-10 bg-black/60 backdrop-blur-md">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 30 }}
@@ -155,7 +251,7 @@ export default function VirtualTryOnPage() {
                             <div className="w-full md:w-1/3 flex flex-col p-8 bg-white/50 dark:bg-black/50">
                                 <div className="flex justify-between items-start mb-8">
                                     <h3 className="text-2xl font-bold">Try-On Result</h3>
-                                    <button onClick={() => setShowModal(false)} className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                                    <button onClick={() => setShowResultModal(false)} className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -164,10 +260,10 @@ export default function VirtualTryOnPage() {
                                     <div>
                                         <h4 className="text-sm font-semibold text-foreground/50 uppercase tracking-wider mb-3">Garment</h4>
                                         <div className="flex items-center gap-4 bg-white/80 dark:bg-black/40 p-3 rounded-2xl border border-black/5 dark:border-white/5 shadow-sm">
-                                            <div className="w-16 h-16 rounded-xl bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${garmentImage})`, mixBlendMode: 'multiply' }} />
+                                            <div className="w-16 h-16 rounded-xl bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${selectedGarment?.url})`, mixBlendMode: 'multiply' }} />
                                             <div>
-                                                <p className="font-semibold text-sm">Silk Blouse</p>
-                                                <p className="text-xs text-foreground/60">Ivory &middot; Top</p>
+                                                <p className="font-semibold text-sm truncate max-w-[150px]">{selectedGarment?.name}</p>
+                                                <p className="text-xs text-foreground/60">Selected Wardrobe Item</p>
                                             </div>
                                         </div>
                                     </div>

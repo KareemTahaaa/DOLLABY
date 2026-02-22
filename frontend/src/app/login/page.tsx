@@ -16,6 +16,8 @@ export default function LoginPage() {
         // Mock login delay
         setTimeout(() => {
             setIsLoading(false);
+            const userName = email.split('@')[0];
+            localStorage.setItem("dollaby_userName", userName || "User");
             window.location.href = "/dashboard";
         }, 1500);
     };

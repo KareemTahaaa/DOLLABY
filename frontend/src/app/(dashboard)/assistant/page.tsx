@@ -17,12 +17,17 @@ const suggestionChips = [
 ];
 
 export default function AssistantPage() {
-    const [messages, setMessages] = useState<Message[]>([
-        { id: 1, type: "ai", content: "Hi Sarah! I'm your AI stylist. What occasion are we dressing for today?" }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const storedName = localStorage.getItem("dollaby_userName") || "User";
+        setMessages([
+            { id: 1, type: "ai", content: `Hi ${storedName}! I'm your AI stylist. What occasion are we dressing for today?` }
+        ]);
+    }, []);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
