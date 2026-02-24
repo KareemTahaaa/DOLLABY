@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { LayoutDashboard, Shirt, Layers, Calendar, Sparkles, MessageSquare, Settings, Search, Bell, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { LayoutDashboard, Shirt, Layers, Calendar, Sparkles, MessageSquare, Settings, Search, Bell, User, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -19,13 +19,14 @@ const navigation = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [searchFocused, setSearchFocused] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-background text-foreground flex overflow-hidden">
             {/* Sidebar */}
             <aside className="w-64 border-r border-black/5 dark:border-white/5 flex flex-col glass dark:glass-dark hidden md:flex z-20">
                 <div className="h-20 flex items-center px-8 border-b border-black/5 dark:border-white/5">
-                    <Link href="/" className="text-2xl font-bold tracking-tighter">Dollaby.</Link>
+                    <Link href="/" className="text-2xl font-bold tracking-tighter">Dollaby</Link>
                 </div>
 
                 <div className="flex-1 py-6 px-4 flex flex-col gap-2 overflow-y-auto">
@@ -50,20 +51,77 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             </aside>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col relative z-10 w-full">
-                {/* Top Navbar */}
-                <header className="h-20 glass dark:glass-dark border-b border-black/5 dark:border-white/5 flex items-center justify-between px-6 lg:px-10 sticky top-0 z-30">
-
-                    <div className={`flex items-center bg-white/50 dark:bg-black/20 border transition-all rounded-full px-4 py-2 w-full max-w-md ${searchFocused ? "border-accent ring-2 ring-accent/20" : "border-black/10 dark:border-white/10"}`}>
-                        <Search className="w-4 h-4 text-foreground/40 mr-2" />
-                        <input
-                            type="text"
-                            placeholder="Search clothes, outfits, or ask AI..."
-                            className="bg-transparent border-none outline-none w-full text-sm placeholder:text-foreground/40"
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 z-50 md:hidden flex">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/50"
+                            onClick={() => setIsMobileMenuOpen(false)}
                         />
+                        <motion.div
+                            initial={{ x: "-100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "-100%" }}
+                            transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+                            className="w-64 h-full bg-background border-r border-black/5 dark:border-white/5 glass dark:glass-dark relative z-50 flex flex-col"
+                        >
+                            <div className="h-20 flex items-center justify-between px-8 border-b border-black/5 dark:border-white/5">
+                                <Link href="/" className="text-2xl font-bold tracking-tighter" onClick={() => setIsMobileMenuOpen(false)}>Dollaby.</Link>
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors">
+                                    <X className="w-5 h-5 text-foreground/70" />
+                                </button>
+                            </div>
+                            <div className="flex-1 py-6 px-4 flex flex-col gap-2 overflow-y-auto">
+                                <div className="text-xs font-semibold text-foreground/40 uppercase tracking-wider mb-2 px-4">Menu</div>
+                                {navigation.map((item) => {
+                                    const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${isActive
+                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                                                : "text-foreground/70 hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
+                                                }`}
+                                        >
+                                            <item.icon className={`w-5 h-5 ${isActive ? "text-accent" : ""}`} />
+                                            <span className="font-medium">{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col relative z-10 w-full overflow-hidden">
+                {/* Top Navbar */}
+                <header className="h-20 glass dark:glass-dark border-b border-black/5 dark:border-white/5 flex items-center justify-between px-4 lg:px-10 sticky top-0 z-30">
+
+                    <div className="flex items-center gap-2 w-full max-w-md">
+                        <button
+                            className="md:hidden p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors focus:outline-none"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                        >
+                            <Menu className="w-6 h-6 text-foreground" />
+                        </button>
+                        <div className={`flex items-center bg-white/50 dark:bg-black/20 border transition-all rounded-full px-4 py-2 w-full ${searchFocused ? "border-accent ring-2 ring-accent/20" : "border-black/10 dark:border-white/10"}`}>
+                            <Search className="w-4 h-4 text-foreground/40 mr-2 flex-shrink-0" />
+                            <input
+                                type="text"
+                                placeholder="Search clothes, outfits, or ask AI..."
+                                className="bg-transparent border-none outline-none w-full text-sm placeholder:text-foreground/40"
+                                onFocus={() => setSearchFocused(true)}
+                                onBlur={() => setSearchFocused(false)}
+                            />
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-4">

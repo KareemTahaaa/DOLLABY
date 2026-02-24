@@ -162,35 +162,13 @@ export default function LandingPage() {
         </section>
 
         {/* Testimonials */}
-        <section className="py-32 bg-primary text-primary-foreground">
-          <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">Loved by Visionaries</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((test, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.2 }}
-                  className="p-8 rounded-3xl bg-white/5 border border-white/10"
-                >
-                  <p className="text-lg leading-relaxed mb-8 italic">"{test.quote}"</p>
-                  <div>
-                    <h4 className="font-bold">{test.name}</h4>
-                    <p className="text-accent text-sm">{test.role}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+
       </main>
 
       {/* Footer */}
       <footer className="border-t border-black/5 dark:border-white/5 py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-2xl font-bold">Dollaby.</div>
+          <div className="text-2xl font-bold">Dollaby</div>
           <div className="flex gap-8 text-foreground/60 text-sm">
             <Link href="#" className="hover:text-foreground">About</Link>
             <Link href="#" className="hover:text-foreground">Privacy</Link>
@@ -198,7 +176,7 @@ export default function LandingPage() {
             <Link href="#" className="hover:text-foreground">Contact</Link>
           </div>
           <div className="text-sm text-foreground/40">
-            © {new Date().getFullYear()} Dollaby Inc. All rights reserved.
+            © {new Date().getFullYear()} Dollaby developed by @Kareem Taha
           </div>
         </div>
       </footer>
