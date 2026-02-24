@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Layers, Wand2, Calendar, Shirt, MessageSquare } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Sparkles, Layers, Wand2, Calendar, Shirt, MessageSquare, Menu, X } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 const features = [
   {
@@ -44,19 +45,47 @@ const testimonials = [
 ];
 
 export default function LandingPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen animated-bg flex flex-col text-foreground overflow-x-hidden">
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 glass dark:glass-dark border-b border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="text-2xl font-bold tracking-tighter">Dollaby.</div>
-          <div className="flex gap-6 items-center">
+          <Link href="/" className="text-2xl font-bold tracking-tighter hover:opacity-80 transition-opacity">Dollaby.</Link>
+
+          <div className="hidden md:flex gap-6 items-center">
             <Link href="/login" className="text-sm font-medium hover:text-accent transition-colors">Log in</Link>
             <Link href="/signup" className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl">
               Get Started
             </Link>
           </div>
+
+          <button
+            className="md:hidden p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors focus:outline-none"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6 text-foreground" /> : <Menu className="w-6 h-6 text-foreground" />}
+          </button>
         </div>
+
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="md:hidden absolute top-20 left-0 w-full glass dark:glass-dark border-b border-black/5 dark:border-white/5 flex flex-col p-6 shadow-xl"
+            >
+              <div className="flex flex-col gap-6">
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium hover:text-accent transition-colors">Log in</Link>
+                <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="bg-primary text-primary-foreground px-5 py-4 rounded-xl text-center font-medium hover:bg-primary/90 transition-all shadow-lg">
+                  Get Started
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
