@@ -1,7 +1,8 @@
 fastapi
 uvicorn
-sqlalchemy
-psycopg2-binary
+motor
+pymongo
+python-dotenv
 python-multipart
 python-jose[cryptography]
 passlib[bcrypt]
@@ -9,3 +10,5 @@ pydantic
 pydantic-settings
 openai
 httpx
+aiofiles
+

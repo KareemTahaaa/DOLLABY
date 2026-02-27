@@ -52,7 +52,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 glass dark:glass-dark border-b border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tighter hover:opacity-80 transition-opacity">Dollaby.</Link>
+          <Link href="/" className="text-2xl font-bold tracking-tighter hover:opacity-80 transition-opacity">Dollaby</Link>
 
           <div className="hidden md:flex gap-6 items-center">
             <Link href="/login" className="text-sm font-medium hover:text-accent transition-colors">Log in</Link>

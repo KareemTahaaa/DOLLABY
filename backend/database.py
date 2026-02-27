@@ -1,21 +1,19 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
 
-# To be set via environment variables later. For now, we'll use a local db or sqlite fallback.
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dollaby.db")
+load_dotenv()
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Get the MongoDB URL from environment variables
+MONGODB_URL = os.getenv("DATABASE_URL")
+DB_NAME = "dollaby"
 
-Base = declarative_base()
+class Database:
+    client: AsyncIOMotorClient = None
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+db = Database()
+
+async def get_database():
+    """Dependency to get the Dollaby MongoDB database."""
+    return db.client[DB_NAME]
+

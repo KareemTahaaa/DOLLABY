@@ -1,19 +1,37 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shirt, Plus, Calendar as CalendarIcon, Sun, CloudRain } from "lucide-react";
+import { Shirt, Plus, Calendar as CalendarIcon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { apiGetCloset } from "@/lib/api";
+
+type ClothingItem = {
+    id: string;
+    name: string;
+    category: string;
+    color: string;
+    image_url?: string;
+};
+
+const API_BASE = "http://localhost:8000";
 
 export default function DashboardOverview() {
     const [userName, setUserName] = useState("User");
+    const [wardrobeItems, setWardrobeItems] = useState<ClothingItem[]>([]);
 
     useEffect(() => {
         const storedName = localStorage.getItem("dollaby_userName");
-        if (storedName) {
-            setUserName(storedName);
-        }
+        if (storedName) setUserName(storedName);
+        // Fetch real wardrobe items
+        apiGetCloset().then(setWardrobeItems).catch(() => { });
     }, []);
+
+    const topCount = wardrobeItems.filter(i => i.category === "Top").length;
+    const bottomCount = wardrobeItems.filter(i => i.category === "Bottom").length;
+    const otherCount = wardrobeItems.filter(i => !["Top", "Bottom"].includes(i.category)).length;
+    const recentItems = wardrobeItems.slice(0, 3);
+
 
     return (
         <div className="flex flex-col gap-8 pb-10">
@@ -85,22 +103,22 @@ export default function DashboardOverview() {
                     </div>
 
                     <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-bold tracking-tighter">142</span>
+                        <span className="text-5xl font-bold tracking-tighter">{wardrobeItems.length}</span>
                         <span className="text-foreground/50 pb-1 font-medium">Items</span>
                     </div>
 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center text-sm">
                             <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-accent" /> Tops</span>
-                            <span className="font-semibold">64</span>
+                            <span className="font-semibold">{topCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
                             <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-primary" /> Bottoms</span>
-                            <span className="font-semibold">38</span>
+                            <span className="font-semibold">{bottomCount}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-foreground/20" /> Shoes & Acc.</span>
-                            <span className="font-semibold">40</span>
+                            <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-foreground/20" /> Shoes &amp; Acc.</span>
+                            <span className="font-semibold">{otherCount}</span>
                         </div>
                     </div>
                 </motion.div>
@@ -118,11 +136,23 @@ export default function DashboardOverview() {
                         <Link href="/closet" className="text-sm font-medium text-accent hover:underline">View All</Link>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
-                        {[1, 2, 3].map((item) => (
-                            <div key={item} className="aspect-[3/4] rounded-2xl bg-white/50 dark:bg-black/20 border border-black/5 dark:border-white/5 shadow-sm p-4 flex items-center justify-center hover:shadow-md transition-all cursor-pointer group">
-                                <Shirt className="w-12 h-12 text-foreground/10 group-hover:scale-110 group-hover:text-accent/50 transition-all" />
-                            </div>
-                        ))}
+                        {recentItems.length === 0 ? (
+                            [1, 2, 3].map(i => (
+                                <div key={i} className="aspect-[3/4] rounded-2xl bg-white/50 dark:bg-black/20 border border-black/5 dark:border-white/5 shadow-sm p-4 flex items-center justify-center">
+                                    <Shirt className="w-12 h-12 text-foreground/10" />
+                                </div>
+                            ))
+                        ) : (
+                            recentItems.map(item => (
+                                <div key={item.id} className="aspect-[3/4] rounded-2xl bg-white/50 dark:bg-black/20 border border-black/5 dark:border-white/5 shadow-sm overflow-hidden hover:shadow-md transition-all cursor-pointer">
+                                    {item.image_url ? (
+                                        <img src={`${API_BASE}${item.image_url}`} alt={item.name} className="w-full h-full object-contain p-2" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center"><Shirt className="w-10 h-10 text-foreground/20" /></div>
+                                    )}
+                                </div>
+                            ))
+                        )}
                     </div>
                 </motion.div>
 

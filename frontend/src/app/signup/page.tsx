@@ -1,26 +1,34 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { User, Mail, Lock, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { apiRegister } from "@/lib/api";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        // Mock signup delay
-        setTimeout(() => {
-            setIsLoading(false);
-            localStorage.setItem("dollaby_userName", name || "User");
+        setError("");
+        try {
+            const data = await apiRegister(name, email, password);
+            localStorage.setItem("dollaby_token", data.access_token);
+            localStorage.setItem("dollaby_userName", name);
             window.location.href = "/dashboard";
-        }, 1500);
+        } catch (err: any) {
+            setError(err.message ?? "Registration failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
+
 
     return (
         <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-foreground">
