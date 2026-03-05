@@ -1,7 +1,6 @@
 // Shared API utility for Dollaby frontend
-// All API calls go through this helper
-
-const API_BASE = "http://localhost:8000";
+// In production, set NEXT_PUBLIC_API_URL to your deployed backend URL (e.g. https://your-backend.onrender.com)
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export function getToken(): string | null {
     if (typeof window === "undefined") return null;

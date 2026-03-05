@@ -20,7 +20,8 @@ type Slot = "Top" | "Bottom" | "Shoes" | "Accessories" | "Outerwear" | "Dress";
 const ALL_SLOTS: Slot[] = ["Top", "Bottom", "Shoes", "Accessories", "Outerwear", "Dress"];
 const OCCASIONS = ["Casual", "Formal", "Business", "Party", "Sport", "Vacation"];
 const SEASONS = ["All", "Summer", "Winter", "Spring", "Fall"];
-const API_BASE = "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
 
 export default function OutfitBuilderPage() {
     const [wardrobeItems, setWardrobeItems] = useState<ClothingItem[]>([]);
