@@ -115,3 +115,29 @@ export async function apiChat(
     if (!res.ok) return null;
     return res.body?.getReader() ?? null;
 }
+// ---- Calendar ----
+export async function apiGetCalendar() {
+    return apiFetch("/calendar");
+}
+
+export async function apiSaveCalendarEntry(data: {
+    date: string;
+    outfit_id?: string;
+    outfit_name?: string;
+    note?: string;
+}) {
+    return apiFetch("/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+}
+
+export async function apiDeleteCalendarEntry(id: string) {
+    return apiFetch(`/calendar/${id}`, { method: "DELETE" });
+}
+
+// ---- Weather ----
+export async function apiGetWeather() {
+    return apiFetch("/weather/forecast");
+}

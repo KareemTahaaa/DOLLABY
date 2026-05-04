@@ -28,6 +28,8 @@
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fdfdf9; /* Ivory */
   --foreground: #111111; /* Black */
@@ -38,16 +40,14 @@
   --muted: #e5e5dd; /* Beige */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #111111;
-    --foreground: #fdfdf9;
-    --primary: #fdfdf9;
-    --primary-foreground: #111111;
-    --accent: #d4af37;
-    --accent-foreground: #111111;
-    --muted: #2a2a2a;
-  }
+.dark {
+  --background: #111111;
+  --foreground: #fdfdf9;
+  --primary: #fdfdf9;
+  --primary-foreground: #111111;
+  --accent: #d4af37;
+  --accent-foreground: #111111;
+  --muted: #2a2a2a;
 }
 
 body {
@@ -67,12 +67,10 @@ h1, h2, h3, h4, h5, h6 {
   animation: gradientBG 15s ease infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  .animated-bg {
-    background: linear-gradient(-45deg, #0a0a0a, #111111, #1a1a1a, #050505);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-  }
+.dark .animated-bg {
+  background: linear-gradient(-45deg, #0a0a0a, #111111, #1a1a1a, #050505);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
 @keyframes gradientBG {

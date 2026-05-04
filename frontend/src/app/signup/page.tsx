@@ -21,6 +21,8 @@ export default function SignupPage() {
             const data = await apiRegister(name, email, password);
             localStorage.setItem("dollaby_token", data.access_token);
             localStorage.setItem("dollaby_userName", name);
+            // Also set cookie so Next.js middleware can protect routes server-side
+            document.cookie = `dollaby_token=${data.access_token}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 7}`;
             window.location.href = "/dashboard";
         } catch (err: any) {
             setError(err.message ?? "Registration failed. Please try again.");

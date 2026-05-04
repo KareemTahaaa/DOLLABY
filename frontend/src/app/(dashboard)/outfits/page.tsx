@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shirt, CheckCircle2, Target, Save, Sparkles, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { apiGetCloset, apiGenerateOutfit, apiSaveOutfit } from "@/lib/api";
+import toast from "react-hot-toast";
 
 type ClothingItem = {
     id: string;
@@ -34,9 +35,7 @@ export default function OutfitBuilderPage() {
     const [aiReasoning, setAiReasoning] = useState<string>("");
     const [aiOutfitName, setAiOutfitName] = useState<string>("");
     const [generatingAI, setGeneratingAI] = useState(false);
-    const [aiError, setAiError] = useState("");
     const [saving, setSaving] = useState(false);
-    const [savedMsg, setSavedMsg] = useState("");
     const [occasion, setOccasion] = useState("Casual");
     const [season, setSeason] = useState("All");
 
@@ -57,18 +56,15 @@ export default function OutfitBuilderPage() {
     };
 
     const handleSelectItem = (item: ClothingItem, slot: Slot) => {
-        setOutfit(prev => {
-            const updated = { ...prev, [slot]: item };
-            const filled = Object.values(updated).filter(Boolean).length;
-            if (filled >= 2) setAiScore(Math.floor(Math.random() * 10) + 88);
-            else setAiScore(null);
-            return updated;
-        });
+        setOutfit(prev => ({ ...prev, [slot]: item }));
+        // Clear any previous AI score/reasoning when manually changing items
+        setAiScore(null);
+        setAiReasoning("");
+        setAiOutfitName("");
     };
 
     const handleGenerateAI = async () => {
         setGeneratingAI(true);
-        setAiError("");
         try {
             const result = await apiGenerateOutfit(occasion, season);
             // Place each AI-selected item into the right slot
@@ -83,8 +79,9 @@ export default function OutfitBuilderPage() {
             setAiScore(result.ai_score ?? 92);
             setAiReasoning(result.ai_reasoning ?? "");
             setAiOutfitName(result.outfit_name ?? "");
+            toast.success("AI Outfit Generated!");
         } catch (err: any) {
-            setAiError(err.message ?? "AI generation failed. Make sure your OpenAI API key is set.");
+            toast.error(err.message ?? "AI generation failed. Make sure your OpenAI API key is set.");
         } finally {
             setGeneratingAI(false);
         }
@@ -94,7 +91,6 @@ export default function OutfitBuilderPage() {
         const selectedItems = Object.values(outfit).filter(Boolean) as ClothingItem[];
         if (selectedItems.length === 0) return;
         setSaving(true);
-        setSavedMsg("");
         try {
             await apiSaveOutfit({
                 name: aiOutfitName || `${occasion} Outfit`,
@@ -103,10 +99,9 @@ export default function OutfitBuilderPage() {
                 ai_score: aiScore ?? undefined,
                 ai_reasoning: aiReasoning,
             });
-            setSavedMsg("Outfit saved successfully!");
-            setTimeout(() => setSavedMsg(""), 3000);
+            toast.success("Outfit saved successfully!");
         } catch (err: any) {
-            setSavedMsg("Failed to save: " + err.message);
+            toast.error("Failed to save: " + err.message);
         } finally {
             setSaving(false);
         }
@@ -153,22 +148,12 @@ export default function OutfitBuilderPage() {
                 </div>
             </div>
 
-            {savedMsg && (
-                <div className={`text-sm p-3 rounded-xl mb-4 ${savedMsg.includes("Failed") ? "bg-red-50 text-red-600 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
-                    {savedMsg}
-                </div>
-            )}
-            {aiError && (
-                <div className="flex items-center gap-2 text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 rounded-xl p-3 text-sm mb-4">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" /> {aiError}
-                </div>
-            )}
 
             <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
 
                 {/* Outfit Canvas */}
                 <div className="flex-[1.5] flex flex-col gap-6">
-                    <div className="flex-1 glass rounded-3xl p-8 border border-black/5 dark:border-white/5 relative flex items-center justify-center overflow-hidden">
+                    <div className="flex-1 glass rounded-3xl p-8 pt-20 border border-black/5 dark:border-white/5 relative flex flex-col items-center overflow-y-auto scrollbar-hide">
                         {/* AI Score Badge */}
                         <AnimatePresence>
                             {aiScore && (
@@ -176,7 +161,7 @@ export default function OutfitBuilderPage() {
                                     initial={{ opacity: 0, scale: 0.8, y: -20 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.8 }}
-                                    className="absolute top-6 right-6 bg-green-500/10 text-green-600 border border-green-500/20 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm font-medium"
+                                    className="absolute top-6 right-6 z-10 bg-green-500/10 text-green-600 border border-green-500/20 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-sm font-medium"
                                 >
                                     <Target className="w-4 h-4" /> Compatibility: {aiScore}%
                                 </motion.div>
@@ -184,12 +169,12 @@ export default function OutfitBuilderPage() {
                         </AnimatePresence>
 
                         {aiOutfitName && (
-                            <div className="absolute top-6 left-6 text-sm font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full">
+                            <div className="absolute top-6 left-6 z-10 text-sm font-semibold text-accent bg-accent/10 px-3 py-1.5 rounded-full">
                                 {aiOutfitName}
                             </div>
                         )}
 
-                        <div className="relative w-full max-w-sm flex flex-col items-center gap-4">
+                        <div className="relative w-full max-w-sm flex flex-col items-center gap-4 my-auto">
                             {ALL_SLOTS.filter(slot => slot !== "Outerwear" && slot !== "Accessories").map((slot) => {
                                 const item = outfit[slot];
                                 return (

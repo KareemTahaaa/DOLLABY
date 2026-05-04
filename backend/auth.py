@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Optional
 import os
+import bcrypt
 from database import get_database
 from models import UserCreate, UserLogin, Token
 
@@ -12,17 +12,17 @@ SECRET_KEY = os.getenv("SECRET_KEY", "dollaby-super-secret-key-change-in-product
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -46,7 +46,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db=Depends(get_d
     except JWTError:
         raise credentials_exception
 
-    user = await db["users"].find_one({"_id": user_id})
+    # _id in MongoDB is stored as ObjectId — must convert the string from the JWT back
+    from bson import ObjectId
+    if not ObjectId.is_valid(user_id):
+        raise credentials_exception
+
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
     if user is None:
         raise credentials_exception
     return user
@@ -90,4 +95,6 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "id": str(current_user["_id"]),
         "name": current_user["name"],
         "email": current_user["email"],
+        "location": current_user.get("location", "Cairo, Egypt"),
+        "profile_picture": current_user.get("profile_picture")
     }

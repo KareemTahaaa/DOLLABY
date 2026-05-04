@@ -1,6 +1,6 @@
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-from openai import AsyncOpenAI
+from groq import AsyncGroq
 import os
 from database import get_database
 from auth import get_current_user
@@ -66,13 +66,13 @@ async def generate_outfit(
         "Return the IDs of the selected items, a stylish outfit name, an AI compatibility score (0-100), and reasoning."
     )
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=503, detail="OPENAI_API_KEY is not set in the backend .env file.")
-    client = AsyncOpenAI(api_key=api_key)
+        raise HTTPException(status_code=503, detail="GROQ_API_KEY is not set in the backend .env file.")
+    client = AsyncGroq(api_key=api_key)
 
     response = await client.chat.completions.create(
-        model="gpt-4o",
+        model="llama-3.3-70b-versatile",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from openai import AsyncOpenAI
+from groq import AsyncGroq
 import os
 from database import get_database
 from auth import get_current_user
@@ -33,12 +33,45 @@ async def chat_with_assistant(
     else:
         wardrobe_summary = "The user has not added any items to their wardrobe yet."
 
+    # Fetch weather & upcoming calendar
+    location = current_user.get("location", "Cairo, Egypt")
+    from weather import get_weather_forecast
+    try:
+        weather_data = await get_weather_forecast(current_user)
+        forecasts = weather_data.get("forecast", [])
+    except Exception:
+        forecasts = []
+
+    from datetime import datetime
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    upcoming_events = await db["calendar"].find({"user_id": user_id, "date": {"$gte": today_str}}).to_list(length=14)
+    event_map = {e["date"]: e.get("outfit_name", "Unknown Outfit") for e in upcoming_events}
+
+    context_lines = []
+    if forecasts:
+        context_lines.append(f"**Location:** {location}")
+        context_lines.append(f"**Forecast & Schedule (Starting {today_str}):**")
+        for f in forecasts[:7]:  # Provide 7 days of context
+            date_str = f["date"]
+            cond = f["description"]
+            event = event_map.get(date_str)
+            line = f"- {date_str}: {cond}."
+            if event:
+                line += f" User will wear: '{event}'."
+            else:
+                line += " No outfit scheduled yet."
+            context_lines.append(line)
+    
+    schedule_context = "\n".join(context_lines)
+
     system_prompt = f"""You are Dollaby, an expert AI fashion stylist and personal shopping assistant with deep knowledge of fashion trends, color theory, and style principles.
 
 The user's name is {user_name}. You have access to their personal wardrobe:
 
 **{user_name}'s Wardrobe:**
 {wardrobe_summary}
+
+{schedule_context}
 
 Your role is to:
 1. Offer personalized styling advice based on what they actually own
@@ -55,15 +88,15 @@ Always be concise, friendly, and specific. When suggesting outfit combinations, 
         messages.append({"role": msg.role, "content": msg.content})
     messages.append({"role": "user", "content": request.message})
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail="OPENAI_API_KEY is not set in the backend .env file.")
-    client = AsyncOpenAI(api_key=api_key)
+        raise HTTPException(status_code=503, detail="GROQ_API_KEY is not set in the backend .env file.")
+    client = AsyncGroq(api_key=api_key)
 
     async def stream_response():
         stream = await client.chat.completions.create(
-            model="gpt-4o",
+            model="llama-3.3-70b-versatile",
             messages=messages,
             stream=True,
             temperature=0.8,

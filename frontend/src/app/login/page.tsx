@@ -22,6 +22,8 @@ export default function LoginPage() {
             // Decode name from JWT payload
             const payload = JSON.parse(atob(data.access_token.split(".")[1]));
             localStorage.setItem("dollaby_userName", payload.name ?? email.split("@")[0]);
+            // Also set cookie so Next.js middleware can protect routes server-side
+            document.cookie = `dollaby_token=${data.access_token}; path=/; SameSite=Lax; max-age=${60 * 60 * 24 * 7}`;
             window.location.href = "/dashboard";
         } catch (err: any) {
             setError(err.message ?? "Login failed. Please check your credentials.");

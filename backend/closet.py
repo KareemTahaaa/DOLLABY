@@ -41,29 +41,78 @@ async def get_closet(
 @router.post("/upload", response_model=ClothingItemResponse)
 async def upload_clothing_item(
     name: str = Form(...),
-    category: str = Form(...),
-    color: str = Form(...),
-    season: str = Form(...),
     brand: Optional[str] = Form(None),
-    fabric: Optional[str] = Form(None),
-    tags: Optional[str] = Form(None),  # comma-separated
     image: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
     db=Depends(get_database)
 ):
     user_id = str(current_user["_id"])
 
-    # Save the image file
-    ext = os.path.splitext(image.filename)[1]
-    filename = f"{user_id}_{ObjectId()}{ext}"
+    # Read the image file
+    input_bytes = await image.read()
+    
+    # Remove Background
+    try:
+        from rembg import remove
+        import asyncio
+        loop = asyncio.get_event_loop()
+        output_bytes = await loop.run_in_executor(None, remove, input_bytes)
+    except Exception as e:
+        print("Background removal failed:", e)
+        output_bytes = input_bytes
+        
+    # Save the image file as PNG
+    filename = f"{user_id}_{ObjectId()}.png"
     file_path = os.path.join(UPLOAD_DIR, filename)
+    
     with open(file_path, "wb") as f:
-        shutil.copyfileobj(image.file, f)
+        f.write(output_bytes)
 
     image_url = f"/uploads/{filename}"
 
-    # Parse tags
-    tags_list = [t.strip() for t in tags.split(",")] if tags else []
+    # AI Vision Classification
+    category, color, season, fabric, tags_list = "Top", "Unknown", "All", "Unknown", []
+    
+    import base64
+    from groq import AsyncGroq
+    import json
+
+    try:
+        with open(file_path, "rb") as f:
+            encoded_image = base64.b64encode(f.read()).decode('utf-8')
+            
+        api_key = os.getenv("GROQ_API_KEY")
+        if api_key:
+            client = AsyncGroq(api_key=api_key)
+            vision_prompt = """You are an expert AI fashion classifier. Look at this clothing item and extract the following metadata:
+- category: Pick exactly ONE of ["Top", "Bottom", "Outerwear", "Shoes", "Accessories", "Dress"]. 
+- color: The primary color (e.g. Navy Blue, White).
+- season: Pick ONE of ["Summer", "Winter", "Spring", "Fall", "All"]. 
+- fabric: The main fabric (e.g. Cotton, Denim, Leather). Say "Unknown" if you can't tell.
+- tags: An array of 2-3 style tags (e.g. ["Casual", "Vintage"]).
+Respond ONLY with a raw JSON object format and nothing else."""
+
+            resp = await client.chat.completions.create(
+                model="llama-3.2-90b-vision-preview",
+                messages=[
+                    {"role": "user", "content": [
+                        {"type": "text", "text": vision_prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}}
+                    ]}
+                ],
+                temperature=0.1
+            )
+            raw_content = resp.choices[0].message.content
+            raw_content = raw_content.replace('```json', '').replace('```', '').strip()
+            metadata = json.loads(raw_content)
+
+            category = metadata.get("category", "Top")
+            color = metadata.get("color", "Unknown")
+            season = metadata.get("season", "All")
+            fabric = metadata.get("fabric", "Unknown")
+            tags_list = metadata.get("tags", [])
+    except Exception as e:
+        print("Vision AI Error:", e)
 
     item_doc = {
         "user_id": user_id,

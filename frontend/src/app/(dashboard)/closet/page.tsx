@@ -3,7 +3,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Filter, Search, Tag, Trash2, X, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { apiGetCloset, apiDeleteItem, apiUploadItem } from "@/lib/api";
+import toast from "react-hot-toast";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -36,13 +38,18 @@ export default function MyClosetPage() {
     const [filterSeason, setFilterSeason] = useState<string | null>(null);
 
     // Upload form state
-    const [form, setForm] = useState({ name: "", category: "Top", color: "", season: "All", brand: "", fabric: "" });
+    const [form, setForm] = useState({ name: "", brand: "" });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const searchParams = useSearchParams();
+
     useEffect(() => {
         fetchItems();
+        // Pre-fill search from URL query param (set by the global navbar search)
+        const q = searchParams.get("search");
+        if (q) setSearch(q);
     }, []);
 
     const fetchItems = async () => {
@@ -51,7 +58,9 @@ export default function MyClosetPage() {
             const data = await apiGetCloset();
             setItems(data);
         } catch (err: any) {
-            setError(err.message ?? "Failed to load wardrobe. Make sure the backend is running.");
+            const msg = err.message ?? "Failed to load wardrobe.";
+            setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -61,8 +70,9 @@ export default function MyClosetPage() {
         try {
             await apiDeleteItem(id);
             setItems(prev => prev.filter(i => i.id !== id));
+            toast.success("Item deleted from closet.");
         } catch (err: any) {
-            alert("Failed to delete: " + err.message);
+            toast.error("Failed to delete: " + err.message);
         }
     };
 
@@ -75,8 +85,8 @@ export default function MyClosetPage() {
     };
 
     const handleUpload = async () => {
-        if (!imageFile) { setUploadError("Please select an image."); return; }
-        if (!form.name || !form.color) { setUploadError("Name and color are required."); return; }
+        if (!imageFile) { toast.error("Please select an image."); return; }
+        if (!form.name.trim()) { toast.error("Name is required."); return; }
 
         setUploadStep("processing");
         setUploadError("");
@@ -84,18 +94,16 @@ export default function MyClosetPage() {
             const fd = new FormData();
             fd.append("image", imageFile);
             fd.append("name", form.name);
-            fd.append("category", form.category);
-            fd.append("color", form.color);
-            fd.append("season", form.season);
             if (form.brand) fd.append("brand", form.brand);
-            if (form.fabric) fd.append("fabric", form.fabric);
 
             const newItem = await apiUploadItem(fd);
             setItems(prev => [newItem, ...prev]);
             setUploadStep("done");
+            toast.success("Item added to your closet!");
         } catch (err: any) {
             setUploadError(err.message ?? "Upload failed");
             setUploadStep("error");
+            toast.error("Upload failed: " + err.message);
         }
     };
 
@@ -104,7 +112,7 @@ export default function MyClosetPage() {
         setUploadError("");
         setImageFile(null);
         setImagePreview(null);
-        setForm({ name: "", category: "Top", color: "", season: "All", brand: "", fabric: "" });
+        setForm({ name: "", brand: "" });
     };
 
     const filteredItems = items.filter(item => {
@@ -304,35 +312,14 @@ export default function MyClosetPage() {
                                             )}
                                         </div>
                                         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
                                                 <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Name *</label>
                                                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Black V-Neck" className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm" />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Color *</label>
-                                                <input value={form.color} onChange={e => setForm(f => ({ ...f, color: e.target.value }))} placeholder="e.g. Navy Blue" className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Category</label>
-                                                <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm">
-                                                    {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Season</label>
-                                                <select value={form.season} onChange={e => setForm(f => ({ ...f, season: e.target.value }))} className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm">
-                                                    {SEASONS.map(s => <option key={s}>{s}</option>)}
-                                                </select>
-                                            </div>
-                                            <div>
                                                 <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Brand</label>
                                                 <input value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))} placeholder="Optional" className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-1 block">Fabric</label>
-                                                <input value={form.fabric} onChange={e => setForm(f => ({ ...f, fabric: e.target.value }))} placeholder="Optional" className="w-full px-3 py-2 rounded-xl border border-black/10 dark:border-white/10 bg-white/40 dark:bg-black/20 focus:outline-none focus:ring-2 focus:ring-accent text-sm" />
                                             </div>
                                         </div>
 
@@ -350,8 +337,8 @@ export default function MyClosetPage() {
                                             <div className="absolute inset-0 border-4 border-accent rounded-full border-t-transparent animate-spin" />
                                             <Sparkles className="absolute inset-0 m-auto w-8 h-8 text-accent animate-pulse" />
                                         </div>
-                                        <h3 className="font-bold text-lg mb-2">Uploading Item...</h3>
-                                        <p className="text-sm text-foreground/60 max-w-xs">Saving to your digital wardrobe.</p>
+                                        <h3 className="font-bold text-lg mb-2">Analyzing item with AI... ✨</h3>
+                                        <p className="text-sm text-foreground/60 max-w-xs">AI is extracting the category, color, season, and fabric from your image to automatically tag it.</p>
                                     </div>
                                 ) : (
                                     <div className="py-8 flex flex-col items-center justify-center text-center">
