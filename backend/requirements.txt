@@ -15,9 +15,15 @@ aiofiles
 groq
 replicate
 gradio_client
-# ── Virtual Try-On: local HR-VITON (only needed if VITON_MODE=local) ──────────
+# ── Virtual Try-On: Simplified Model (only needed for local training) ────────
+# Uncomment these to train locally on GPU
+# torch>=2.0.0
+# torchvision>=0.15.0
+
+# ── Virtual Try-On: HR-VITON (only needed if VITON_MODE=local) ───────────────
 # torch
 # torchvision
 # mediapipe
 # scipy
 Pillow
+tqdm
