@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -40,10 +43,16 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${inter.variable} ${outfit.variable} font-sans antialiased`}
-      >
-        <Toaster position="top-center" />
+      <body className={`${dmSans.variable} ${cormorant.variable} font-sans antialiased`}>
+        <Toaster position="top-center" toastOptions={{
+          style: {
+            borderRadius: '12px',
+            background: 'var(--background)',
+            color: 'var(--foreground)',
+            border: '1px solid rgba(0,0,0,0.08)',
+            fontFamily: 'var(--font-dm-sans)',
+          }
+        }} />
         {children}
       </body>
     </html>

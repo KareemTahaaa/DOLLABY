@@ -1,5 +1,4 @@
 // Shared API utility for Dollaby frontend
-// In production, set NEXT_PUBLIC_API_URL to your deployed backend URL (e.g. https://your-backend.onrender.com)
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export function getToken(): string | null {
@@ -98,6 +97,10 @@ export async function apiSaveOutfit(data: {
     });
 }
 
+export async function apiDeleteOutfit(id: string) {
+    return apiFetch(`/outfits/${id}`, { method: "DELETE" });
+}
+
 // ---- Assistant ----
 export async function apiChat(
     message: string,
@@ -115,6 +118,7 @@ export async function apiChat(
     if (!res.ok) return null;
     return res.body?.getReader() ?? null;
 }
+
 // ---- Calendar ----
 export async function apiGetCalendar() {
     return apiFetch("/calendar");
@@ -140,4 +144,30 @@ export async function apiDeleteCalendarEntry(id: string) {
 // ---- Weather ----
 export async function apiGetWeather() {
     return apiFetch("/weather/forecast");
+}
+
+// ---- Catalog ----
+export async function apiGetCatalog(params: {
+    category?: string;
+    gender?: string;
+    occasion?: string;
+    season?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+} = {}) {
+    const qs = new URLSearchParams();
+    if (params.category) qs.set("category", params.category);
+    if (params.gender)   qs.set("gender",   params.gender);
+    if (params.occasion) qs.set("occasion", params.occasion);
+    if (params.season)   qs.set("season",   params.season);
+    if (params.search)   qs.set("search",   params.search);
+    if (params.limit)    qs.set("limit",    String(params.limit));
+    if (params.offset)   qs.set("offset",   String(params.offset));
+    const q = qs.toString();
+    return apiFetch(`/catalog${q ? "?" + q : ""}`);
+}
+
+export async function apiAddCatalogToCloset(itemId: string) {
+    return apiFetch(`/catalog/${itemId}/add`, { method: "POST" });
 }

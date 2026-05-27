@@ -14,9 +14,24 @@ venv/
 dist/
 build/
 
-# Uploaded files
+# Uploaded files & generated assets
 backend/uploads/
 backend/dollaby.db
+
+# Kaggle dataset cache (large, re-downloadable)
+backend/scripts/_kaggle_cache/
+
+# Seed / process logs
+backend/scripts/seed_log.txt
+backend/scripts/seed_err.txt
+backend/scripts/process_log.txt
+backend/scripts/process_err.txt
+
+# Superpowers brainstorm artifacts
+.superpowers/
+.agents/
+.mcp.json
+skills-lock.json
 
 # Node / Next.js
 node_modules/

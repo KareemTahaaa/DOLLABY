@@ -8,79 +8,142 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-muted: var(--muted);
-  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
-  --font-heading: var(--font-outfit), Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-dm-sans), "DM Sans", Arial, sans-serif;
+  --font-heading: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+}
+
+/* ── Glass system — uses variables so dark mode works automatically ── */
+:root {
+  --glass-bg:         rgba(255, 255, 255, 0.50);
+  --glass-bg-heavy:   rgba(255, 255, 255, 0.88);
+  --glass-border:     rgba(0, 0, 0, 0.06);
+  --glass-shadow:     0 4px 40px rgba(0, 0, 0, 0.04);
+  --sidebar-bg:       rgba(253, 253, 249, 0.82);
+  --navbar-bg:        rgba(253, 253, 249, 0.90);
+  --dropdown-bg:      rgba(253, 253, 249, 0.97);
+  --card-bg:          rgba(255, 255, 255, 0.65);
+}
+
+.dark {
+  --glass-bg:         rgba(18, 18, 15, 0.55);
+  --glass-bg-heavy:   rgba(18, 18, 15, 0.92);
+  --glass-border:     rgba(255, 255, 255, 0.07);
+  --glass-shadow:     0 4px 40px rgba(0, 0, 0, 0.50);
+  --sidebar-bg:       rgba(15, 15, 13, 0.88);
+  --navbar-bg:        rgba(15, 15, 13, 0.92);
+  --dropdown-bg:      rgba(22, 22, 18, 0.98);
+  --card-bg:          rgba(255, 255, 255, 0.04);
 }
 
 @utility glass {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-@utility glass-dark {
-  background: rgba(17, 17, 17, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+@utility glass-heavy {
+  background: var(--glass-bg-heavy);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+@utility sidebar-glass {
+  background: var(--sidebar-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+@utility navbar-glass {
+  background: var(--navbar-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+@utility dropdown-glass {
+  background: var(--dropdown-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+@utility card-bg {
+  background: var(--card-bg);
+}
+
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #fdfdf9; /* Ivory */
-  --foreground: #111111; /* Black */
+  --background: #fdfdf9;
+  --foreground: #111111;
   --primary: #111111;
   --primary-foreground: #fdfdf9;
-  --accent: #d4af37; /* Soft Gold */
+  --accent: #c9a84c;
   --accent-foreground: #ffffff;
-  --muted: #e5e5dd; /* Beige */
+  --muted: #e8e5de;
 }
 
 .dark {
-  --background: #111111;
-  --foreground: #fdfdf9;
-  --primary: #fdfdf9;
-  --primary-foreground: #111111;
-  --accent: #d4af37;
-  --accent-foreground: #111111;
-  --muted: #2a2a2a;
+  --background: #0f0f0d;
+  --foreground: #f5f3ee;
+  --primary: #f5f3ee;
+  --primary-foreground: #0f0f0d;
+  --accent: #c9a84c;
+  --accent-foreground: #0f0f0d;
+  --muted: #242420;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  letter-spacing: -0.01em;
 }
 
-/* Subtle Animated Background for Landing Page */
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in srgb, var(--muted) 55%, transparent) 50%,
+    var(--muted) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 12px;
+}
+
+/* Animated gradient background */
 .animated-bg {
-  background: linear-gradient(-45deg, #fdfdf9, #f2eee3, #e5e5dd, #ffffff);
+  background: linear-gradient(-45deg, #fdfdf9, #f5f0e8, #ede8df, #fafaf6);
   background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
+  animation: gradientBG 18s ease infinite;
 }
-
 .dark .animated-bg {
-  background: linear-gradient(-45deg, #0a0a0a, #111111, #1a1a1a, #050505);
+  background: linear-gradient(-45deg, #0a0a08, #111111, #18180f, #0d0d0b);
   background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
+  animation: gradientBG 18s ease infinite;
 }
-
 @keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
 }

@@ -1,18 +1,25 @@
 import os
-from motor.motor_asyncio import AsyncIOMotorClient
+from supabase import create_client, Client
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Get the MongoDB URL from environment variables
-MONGODB_URL = os.getenv("DATABASE_URL")
-DB_NAME = "dollaby"
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
-class Database:
-    client: AsyncIOMotorClient = None
+_client: Client | None = None
 
-db = Database()
 
-async def get_database():
-    """Dependency to get the Dollaby MongoDB database."""
-    return db.client[DB_NAME]
+def get_supabase() -> Client:
+    """Return the singleton Supabase client."""
+    global _client
+    if _client is None:
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in .env")
+        _client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    return _client
+
+
+# Legacy alias so any remaining imports don't crash during migration
+def get_database():
+    return get_supabase()
