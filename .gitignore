@@ -21,6 +21,9 @@ backend/dollaby.db
 # Kaggle dataset cache (large, re-downloadable)
 backend/scripts/_kaggle_cache/
 
+# Trained model checkpoints (large, regenerable from Colab notebooks — too big for GitHub)
+backend/scripts/checkpoints*.zip
+
 # Seed / process logs
 backend/scripts/seed_log.txt
 backend/scripts/seed_err.txt

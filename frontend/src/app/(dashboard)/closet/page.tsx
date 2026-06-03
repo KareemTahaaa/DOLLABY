@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Filter, Search, Tag, Trash2, X, Sparkles, Loader2, AlertCircle, BookOpen, Plus, CheckCircle2 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import { apiGetCloset, apiDeleteItem, apiUploadItem, apiGetCatalog, apiAddCatalogToCloset } from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -62,11 +61,9 @@ export default function MyClosetPage() {
     const [addedIds,      setAddedIds]      = useState<Set<string>>(new Set());
     const PAGE_SIZE = 200;
 
-    const searchParams = useSearchParams();
-
     useEffect(() => {
         fetchItems();
-        const q = searchParams.get("search");
+        const q = new URLSearchParams(window.location.search).get("search");
         if (q) setSearch(q);
     }, []);
 
@@ -411,7 +408,7 @@ export default function MyClosetPage() {
                                                 transition={{ duration: 0.28, delay: Math.min(idx * 0.025, 0.25) }}
                                                 className={`group relative aspect-[3/4] rounded-2xl border overflow-hidden cursor-pointer
                                                     shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300
-                                                    bg-[#f7f7f5] dark:bg-[#1a1a1a]
+                                                    bg-[#f7f7f5] dark:bg-[#f5f4f2]
                                                     ${added ? "border-accent/50 ring-1 ring-accent/20" : "border-black/6 dark:border-white/6"}`}>
 
                                                 {/* Full-bleed product image */}
@@ -455,14 +452,14 @@ export default function MyClosetPage() {
 
                                                 {/* Info footer — slides up on hover */}
                                                 <div className="absolute bottom-0 inset-x-0 translate-y-full group-hover:translate-y-0
-                                                    bg-white/95 dark:bg-black/90 backdrop-blur-md border-t border-black/6 dark:border-white/6
+                                                    bg-white/95 dark:bg-[#e8e7e4]/95 backdrop-blur-md border-t border-black/8
                                                     px-3.5 py-3 transition-transform duration-300 ease-out">
-                                                    <h4 className="font-semibold text-[13px] leading-tight truncate text-foreground">{item.name}</h4>
+                                                    <h4 className="font-semibold text-[13px] leading-tight truncate text-gray-900">{item.name}</h4>
                                                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-accent/10 text-accent">{item.category}</span>
-                                                        <span className="text-[10px] text-foreground/45">{item.color}</span>
-                                                        <span className="text-[10px] text-foreground/30">·</span>
-                                                        <span className="text-[10px] text-foreground/45">{item.season}</span>
+                                                        <span className="text-[10px] text-gray-500">{item.color}</span>
+                                                        <span className="text-[10px] text-gray-400">·</span>
+                                                        <span className="text-[10px] text-gray-500">{item.season}</span>
                                                     </div>
                                                 </div>
                                             </motion.div>

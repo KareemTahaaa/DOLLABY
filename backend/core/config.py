@@ -10,4 +10,5 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "")
 COLAB_VITON_URL = os.getenv("COLAB_VITON_URL", "").rstrip("/")
+VITONHD_COLAB_URL = os.getenv("VITONHD_COLAB_URL", "").rstrip("/")
 VITON_MODE = os.getenv("VITON_MODE", "huggingface").lower()

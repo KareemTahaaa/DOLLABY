@@ -16,4 +16,4 @@ replicate
 gradio_client
 Pillow
 tqdm
-rembg
+rembg[cpu]

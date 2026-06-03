@@ -125,9 +125,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Link href="/signup" className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-full text-lg font-medium hover:bg-primary/90 transition-all shadow-2xl hover:shadow-primary/20">
-              Start Free Trial <ArrowRight className="w-5 h-5" />
-            </Link>
+           
           </motion.div>
         </section>
 
@@ -199,10 +197,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-2xl font-bold">Dollaby</div>
           <div className="flex gap-8 text-foreground/60 text-sm">
-            <Link href="#" className="hover:text-foreground">About</Link>
-            <Link href="#" className="hover:text-foreground">Privacy</Link>
-            <Link href="#" className="hover:text-foreground">Terms</Link>
-            <Link href="#" className="hover:text-foreground">Contact</Link>
+          
           </div>
           <div className="text-sm text-foreground/40">
             © {new Date().getFullYear()} Dollaby developed by @Kareem Taha

@@ -7,6 +7,15 @@ from core.database import get_supabase
 from api.v1.auth import get_current_user
 from models.schemas import ClothingItemCreate, ClothingItemResponse
 
+# Try importing rembg once at startup — it calls sys.exit(1) (SystemExit) if
+# onnxruntime is missing, so we must catch BaseException, not just Exception.
+try:
+    from rembg import remove as _rembg_remove
+    _REMBG_AVAILABLE = True
+except BaseException:
+    _rembg_remove = None
+    _REMBG_AVAILABLE = False
+
 router = APIRouter(prefix="/closet", tags=["Closet"])
 
 UPLOAD_DIR = "uploads"
@@ -82,13 +91,15 @@ async def upload_clothing_item(
     input_bytes = await image.read()
 
     # ── Background removal ────────────────────────────────────────────
-    try:
-        from rembg import remove
-        import asyncio
-        loop = asyncio.get_running_loop()
-        output_bytes = await loop.run_in_executor(None, remove, input_bytes)
-    except Exception as e:
-        print("Background removal failed:", e)
+    if _REMBG_AVAILABLE and _rembg_remove is not None:
+        try:
+            import asyncio
+            loop = asyncio.get_running_loop()
+            output_bytes = await loop.run_in_executor(None, _rembg_remove, input_bytes)
+        except Exception as e:
+            print("Background removal failed:", e)
+            output_bytes = input_bytes
+    else:
         output_bytes = input_bytes
 
     filename  = f"{user_id}_{uuid.uuid4().hex[:8]}.png"
@@ -111,7 +122,7 @@ async def upload_clothing_item(
         if GROQ_API_KEY:
             client = Groq(api_key=GROQ_API_KEY)
             resp = client.chat.completions.create(
-                model="llama-3.2-90b-vision-preview",
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[{"role": "user", "content": [
                     {"type": "text",      "text": VISION_PROMPT},
                     {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded_image}"}},
@@ -142,20 +153,23 @@ async def upload_clothing_item(
     except Exception as e:
         print("Vision AI Error:", e)
 
-    db  = get_supabase()
-    res = db.table("clothing_items").insert({
-        "user_id":   user_id,
-        "name":      name,
-        "category":  category,
-        "color":     color,
-        "season":    season,
-        "brand":     brand,
-        "fabric":    fabric,
-        "tags":      tags_list,
-        "image_url": image_url,
-    }).execute()
-
-    return serialize_item(res.data[0])
+    try:
+        db  = get_supabase()
+        res = db.table("clothing_items").insert({
+            "user_id":   user_id,
+            "name":      name,
+            "category":  category,
+            "color":     color,
+            "season":    season,
+            "brand":     brand,
+            "fabric":    fabric,
+            "tags":      tags_list,
+            "image_url": image_url,
+        }).execute()
+        return serialize_item(res.data[0])
+    except Exception as e:
+        print("Database insert failed:", e)
+        raise HTTPException(status_code=500, detail=f"Failed to save item: {str(e)}")
 
 
 @router.delete("/{item_id}")

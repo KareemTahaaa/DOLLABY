@@ -14,8 +14,8 @@ services:
     environment:
       - VITON_MODE=${VITON_MODE:-replicate}
     volumes:
-      # Persist uploaded images between restarts
-      - uploads_data:/app/uploads
+      # Bind-mount local uploads so catalog images and user uploads are available
+      - ./backend/uploads:/app/uploads
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/')"]
       interval: 30s
@@ -42,11 +42,6 @@ services:
         condition: service_healthy
     networks:
       - dollaby-network
-
-# ── Volumes ────────────────────────────────────────────────────────────────────
-volumes:
-  uploads_data:
-    driver: local
 
 # ── Networks ───────────────────────────────────────────────────────────────────
 networks:

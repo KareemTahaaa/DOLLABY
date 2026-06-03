@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Sparkles, Upload, Camera, ArrowRight, Wand2, X, Shirt, Layers,
     Download, Loader2, CheckCircle, AlertCircle, Zap, ExternalLink,
-    RotateCcw, Info
+    RotateCcw, Info, UserCircle2
 } from "lucide-react";
+import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { apiGetCloset, apiGetOutfits } from "@/lib/api";
 import toast from "react-hot-toast";
@@ -232,6 +233,13 @@ export default function VirtualTryOnPage() {
                         Upload your photo, choose a garment from your wardrobe, and preview the look with AI.
                     </p>
                 </div>
+
+                <Link
+                    href="/try-on/room"
+                    className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full border border-black/10 dark:border-white/10 hover:bg-foreground/5 transition-colors shrink-0"
+                >
+                    <UserCircle2 className="w-4 h-4" /> Try-On Room
+                </Link>
 
                 {/* Service Status Badge */}
                 {serviceStatus && (

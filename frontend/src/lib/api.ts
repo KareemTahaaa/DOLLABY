@@ -171,3 +171,35 @@ export async function apiGetCatalog(params: {
 export async function apiAddCatalogToCloset(itemId: string) {
     return apiFetch(`/catalog/${itemId}/add`, { method: "POST" });
 }
+
+// ---- Try-On Room ----
+export async function apiUploadTryonAvatar(file: File): Promise<{ avatar_url: string }> {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE}/try-on/avatar`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail ?? "Avatar upload failed");
+    }
+    return res.json();
+}
+
+export async function apiGetTryonRoom(): Promise<{
+    avatar_url: string | null;
+    cached_results: Record<string, string>;
+}> {
+    return apiFetch("/try-on/room");
+}
+
+export async function apiGenerateRoomTryon(itemId: string): Promise<{
+    success: boolean;
+    result_url: string;
+    item_id: string;
+}> {
+    return apiFetch(`/try-on/room/generate/${itemId}`, { method: "POST" });
+}

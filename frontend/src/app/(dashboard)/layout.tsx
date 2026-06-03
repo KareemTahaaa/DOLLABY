@@ -7,13 +7,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 const navigation = [
-    { name: "Dashboard",       href: "/dashboard",  icon: LayoutDashboard },
-    { name: "My Closet",       href: "/closet",     icon: Shirt },
-    { name: "Outfit Builder",  href: "/outfits",    icon: Layers },
-    { name: "Calendar",        href: "/calendar",   icon: Calendar },
-    { name: "Virtual Try-On",  href: "/try-on",     icon: Sparkles },
-    { name: "AI Assistant",    href: "/assistant",  icon: MessageSquare },
-    { name: "Settings",        href: "/settings",   icon: Settings },
+    { name: "Dashboard",       href: "/dashboard",    icon: LayoutDashboard },
+    { name: "My Closet",       href: "/closet",       icon: Shirt },
+    { name: "Outfit Builder",  href: "/outfits",      icon: Layers },
+    { name: "Calendar",        href: "/calendar",     icon: Calendar },
+    { name: "Virtual Try-On",  href: "/try-on",       icon: Sparkles },
+    { name: "AI Assistant",    href: "/assistant",    icon: MessageSquare },
+    { name: "Settings",        href: "/settings",     icon: Settings },
 ];
 
 function logout() {

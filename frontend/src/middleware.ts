@@ -10,7 +10,6 @@ const PROTECTED_ROUTES = [
     "/assistant",
     "/settings",
 ];
-
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
@@ -33,7 +32,6 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next();
 }
-
 export const config = {
     // Run middleware on all routes except Next.js internals and static files
     matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
